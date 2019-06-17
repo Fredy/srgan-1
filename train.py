@@ -28,11 +28,11 @@ ni = int(np.sqrt(batch_size))
 
 def train():
     # create folders to save result images and trained model
-    save_dir_ginit = "samples/{}_ginit".format(tl.global_flag['mode'])
-    save_dir_gan = "samples/{}_gan".format(tl.global_flag['mode'])
+    save_dir_ginit = "/content/drive/My Drive/tesis_data/samples/{}_ginit".format(tl.global_flag['mode'])
+    save_dir_gan = "/content/drive/My Drive/tesis_data/samples/{}_gan".format(tl.global_flag['mode'])
     tl.files.exists_or_mkdir(save_dir_ginit)
     tl.files.exists_or_mkdir(save_dir_gan)
-    checkpoint_dir = "checkpoint"  # checkpoint_resize_conv
+    checkpoint_dir = "/content/drive/My Drive/tesis_data/checkpoint"  # checkpoint_resize_conv
     tl.files.exists_or_mkdir(checkpoint_dir)
 
     # load dataset
@@ -153,9 +153,9 @@ def train():
 
 def evaluate():
     ## create folders to save result images
-    save_dir = "samples/{}".format(tl.global_flag['mode'])
+    save_dir = "/content/drive/My Drive/tesis_data/samples/{}".format(tl.global_flag['mode'])
     tl.files.exists_or_mkdir(save_dir)
-    checkpoint_dir = "checkpoint"
+    checkpoint_dir = "/content/drive/My Drive/tesis_data/checkpoint"
 
     ###====================== PRE-LOAD DATA ===========================###
     # train_hr_img_list = sorted(tl.files.load_file_list(path=config.TRAIN.hr_img_path, regx='.*.png', printable=False))
