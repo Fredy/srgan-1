@@ -20,8 +20,8 @@ config.TRAIN.lr_decay = 0.1
 config.TRAIN.decay_every = int(config.TRAIN.n_epoch / 2)
 
 ## train set location
-config.TRAIN.hr_img_path = '/content/drive/My Drive/tesis_data/license_plates/train_Dataset/label/'
-config.TRAIN.lr_img_path = '/content/drive/My Drive/tesis_data/license_plates/train_Dataset/train/'
+config.TRAIN.hr_img_path = '/content/license_plates/train_Dataset/label/'
+config.TRAIN.lr_img_path = '/content/license_plates/train_Dataset/train/'
 
 config.VALID = edict()
 ## test set location
