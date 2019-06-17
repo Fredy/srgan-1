@@ -20,8 +20,8 @@ config.TRAIN.lr_decay = 0.1
 config.TRAIN.decay_every = int(config.TRAIN.n_epoch / 2)
 
 ## train set location
-config.TRAIN.hr_img_path = 'data2017/DIV2K_train_HR/'
-config.TRAIN.lr_img_path = 'data2017/DIV2K_train_LR_bicubic/X4/'
+config.TRAIN.hr_img_path = '/home/fredy/Desktop/license_plates/train_Dataset/label/'
+config.TRAIN.lr_img_path = '/home/fredy/Desktop/license_plates/train_Dataset/train/'
 
 config.VALID = edict()
 ## test set location
