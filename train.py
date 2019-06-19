@@ -77,7 +77,7 @@ def train():
 
     # obtain models
     G = get_G((batch_size, None, None, 3)) # (None, 96, 96, 3)
-    D = get_D((batch_size, 180, 180, 3)) # (None, 384, 384, 3)
+    D = get_D((batch_size, 100, 100, 3)) # (None, 384, 384, 3)
     # VGG = tl.models.vgg19(pretrained=True, end_with='pool4', mode='static')
 
     print(G)
