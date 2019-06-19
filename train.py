@@ -8,7 +8,8 @@ from time import localtime, strftime
 import logging, scipy, multiprocessing
 import tensorflow as tf
 import tensorlayer as tl
-from model import get_G, get_D
+from model import get_G
+from model_og import get_D
 from config import config
 
 ###====================== HYPER-PARAMETERS ===========================###
@@ -154,7 +155,7 @@ def train():
             print(log)
 
         if (epoch != 0) and (epoch % 10 == 0):
-            tl.vis.save_images(fake_hr_patchs.numpy(), [ni, ni], save_dir_gan + '/train_g_{}.png'.format(epoch))
+            tl.vis.save_images(fake_patchs.numpy(), [ni, ni], save_dir_gan + '/train_g_{}.png'.format(epoch))
             G.save_weights(checkpoint_dir + '/g_{}.h5'.format(tl.global_flag['mode']))
             D.save_weights(checkpoint_dir + '/d_{}.h5'.format(tl.global_flag['mode']))
 
