@@ -122,6 +122,7 @@ def train():
     # adversarial learning (G, D)
     n_step_epoch = round(n_epoch // batch_size)
     for step, (lr_patchs, hr_patchs) in enumerate(train_ds):
+        step_time = time.time()
         with tf.GradientTape(persistent=True) as tape:
             fake_patchs = G(lr_patchs)
             logits_fake = D(fake_patchs)
@@ -143,7 +144,7 @@ def train():
         step += 1
         epoch = step//n_step_epoch
         print("Epoch: [{}/{}] step: [{}/{}] time: {}s, g_loss(mse:{}, vgg:{}, adv:{}) d_loss: {}".format(
-            epoch, n_epoch_init, step, n_step_epoch, time.time() - step_time, mse_loss, 0, g_gan_loss, d_loss))
+            epoch, n_epoch, step, n_step_epoch, time.time() - step_time, mse_loss, 0, g_gan_loss, d_loss))
 
         # update learning rate
         if epoch != 0 and (epoch % decay_every == 0):
