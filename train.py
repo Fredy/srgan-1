@@ -122,6 +122,8 @@ def train():
         print('G weights loaded!')
         D.load_weights(checkpoint_dir + '/d_{}.h5'.format(tl.global_flag['mode']))
         print('D weights loaded!')
+    except FileNotFoundError:
+        print('G or D  weights not found')
 
     # adversarial learning (G, D)
     n_step_epoch = round(n_epoch // batch_size)
