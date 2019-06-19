@@ -154,7 +154,7 @@ def train():
             print(log)
 
         if (epoch != 0) and (epoch % 10 == 0):
-            tl.vis.save_images(fake_hr_patchs.numpy(), [3, 2], save_dir_gan + '/train_g_{}.png'.format(epoch))
+            tl.vis.save_images(fake_hr_patchs.numpy(), [ni, ni], save_dir_gan + '/train_g_{}.png'.format(epoch))
             G.save_weights(checkpoint_dir + '/g_{}.h5'.format(tl.global_flag['mode']))
             D.save_weights(checkpoint_dir + '/d_{}.h5'.format(tl.global_flag['mode']))
 

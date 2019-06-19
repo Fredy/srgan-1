@@ -26,7 +26,7 @@ def create_dirs():
 
 def parallel_this(tuple_):
     img, name, out_path = tuple_
-    filling = np.ones_like(img) * 255
+    filling = np.ones((20, 100, 3), dtype=np.int8) * 255
     out = np.concatenate((filling, img, filling))
     tl.vis.save_image(out, os.path.join(out_path, name))
 
@@ -36,6 +36,8 @@ def squarify_imgs(in_path, out_path):
     img_list = sorted(tl.files.load_file_list(
         path=in_path, regx='.*.jpg', printable=False))
     imgs = tl.vis.read_images(img_list, path=in_path, n_threads=32)
+
+    imgs = [i[:, 80:] for i in imgs]
 
     with Pool() as pool:
         pool.map(parallel_this, zip(imgs, img_list, itertools.repeat(out_path)))
