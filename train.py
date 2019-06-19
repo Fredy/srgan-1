@@ -97,28 +97,32 @@ def train():
     # VGG.train()
 
     # initialize learning (G)
-    n_step_epoch = round(n_epoch_init // batch_size)
-    for step, (lr_patchs, hr_patchs) in enumerate(train_ds):
-        step_time = time.time()
-        step += 1
-        epoch = step//n_step_epoch
-        if epoch > n_epoch_init:
-            break
-        with tf.GradientTape() as tape:
-            fake_hr_patchs = G(lr_patchs)
-            mse_loss = tl.cost.mean_squared_error(fake_hr_patchs, hr_patchs, is_mean=True)
-        grad = tape.gradient(mse_loss, G.trainable_weights)
-        g_optimizer_init.apply_gradients(zip(grad, G.trainable_weights))
-        print("Epoch: [{}/{}] step: [{}/{}] time: {}s, mse: {} ".format(
-            epoch, n_epoch_init, step, n_step_epoch, time.time() - step_time, mse_loss))
-        if (epoch != 0) and (epoch % 10 == 0):
-            tl.vis.save_images(fake_hr_patchs.numpy(), [ni, ni], save_dir_gan + '/train_g_init_{}.png'.format(epoch))
-            G.save_weights(checkpoint_dir + '/g_init_{}.h5'.format(tl.global_flag['mode']))
+    try:
+        G.load_weights(checkpoint_dir + '/g_init_{}.h5'.format(tl.global_flag['mode']))
+        print('G initial weights loaded!')
+    except FileNotFoundError:
+        n_step_epoch = round(n_epoch_init // batch_size)
+        for step, (lr_patchs, hr_patchs) in enumerate(train_ds):
+            step_time = time.time()
+            step += 1
+            epoch = step//n_step_epoch
+            if epoch > n_epoch_init:
+                break
+            with tf.GradientTape() as tape:
+                fake_hr_patchs = G(lr_patchs)
+                mse_loss = tl.cost.mean_squared_error(fake_hr_patchs, hr_patchs, is_mean=True)
+            grad = tape.gradient(mse_loss, G.trainable_weights)
+            g_optimizer_init.apply_gradients(zip(grad, G.trainable_weights))
+            print("Epoch: [{}/{}] step: [{}/{}] time: {}s, mse: {} ".format(
+                epoch, n_epoch_init, step, n_step_epoch, time.time() - step_time, mse_loss))
+            if (epoch != 0) and (epoch % 10 == 0):
+                tl.vis.save_images(fake_hr_patchs.numpy(), [ni, ni], save_dir_gan + '/train_g_init_{}.png'.format(epoch))
+                G.save_weights(checkpoint_dir + '/g_init_{}.h5'.format(tl.global_flag['mode']))
 
     # adversarial learning (G, D)
     n_step_epoch = round(n_epoch // batch_size)
     for step, (lr_patchs, hr_patchs) in enumerate(train_ds):
-        with tf.GradientTape() as tape:
+        with tf.GradientTape(persistent=True) as tape:
             fake_patchs = G(lr_patchs)
             logits_fake = D(fake_patchs)
             logits_real = D(hr_patchs)
@@ -134,6 +138,7 @@ def train():
         grad = tape.gradient(g_loss, G.trainable_weights)
         g_optimizer.apply_gradients(zip(grad, G.trainable_weights))
         grad = tape.gradient(d_loss, D.trainable_weights)
+        del tape
         d_optimizer.apply_gradients(zip(grad, D.trainable_weights))
         step += 1
         epoch = step//n_step_epoch
