@@ -85,9 +85,6 @@ def train():
     print(D)
     # print(VGG)
 
-    # G.load_weights(checkpoint_dir + '/g_{}.h5'.format(tl.global_flag['mode'])) # in case you want to restore a training
-    # D.load_weights(checkpoint_dir + '/d_{}.h5'.format(tl.global_flag['mode']))
-
     lr_v = tf.Variable(lr_init)
     g_optimizer_init = tf.optimizers.Adam(lr_v, beta_1=beta1)#.minimize(mse_loss, var_list=g_vars)
     g_optimizer = tf.optimizers.Adam(lr_v, beta_1=beta1)#.minimize(g_loss, var_list=g_vars)
@@ -119,6 +116,12 @@ def train():
             if (epoch != 0) and (epoch % 10 == 0):
                 tl.vis.save_images(fake_hr_patchs.numpy(), [ni, ni], save_dir_gan + '/train_g_init_{}.png'.format(epoch))
                 G.save_weights(checkpoint_dir + '/g_init_{}.h5'.format(tl.global_flag['mode']))
+
+    try:
+        G.load_weights(checkpoint_dir + '/g_{}.h5'.format(tl.global_flag['mode'])) # in case you want to restore a training
+        print('G weights loaded!')
+        D.load_weights(checkpoint_dir + '/d_{}.h5'.format(tl.global_flag['mode']))
+        print('D weights loaded!')
 
     # adversarial learning (G, D)
     n_step_epoch = round(n_epoch // batch_size)
