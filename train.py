@@ -11,6 +11,7 @@ import tensorlayer as tl
 from model import get_G
 from model_og import get_D
 from config import config
+from utils.segment_chars import segment_chars
 
 ###====================== HYPER-PARAMETERS ===========================###
 ## Adam
@@ -78,7 +79,7 @@ def train():
 
     # obtain models
     G = get_G((batch_size, None, None, 3)) # (None, 96, 96, 3)
-    D = get_D((batch_size, 100, 100, 3)) # (None, 384, 384, 3)
+    D = get_D((batch_size * 4, 44, 44, 3)) # (None, 384, 384, 3)
     # VGG = tl.models.vgg19(pretrained=True, end_with='pool4', mode='static')
 
     print(G)
@@ -129,10 +130,12 @@ def train():
     n_step_epoch = round(n_epoch // batch_size)
     for step, (lr_patchs, hr_patchs) in enumerate(train_ds):
         step_time = time.time()
+        hr_chars = segment_chars(hr_patchs)
         with tf.GradientTape(persistent=True) as tape:
             fake_patchs = G(lr_patchs)
-            logits_fake = D(fake_patchs)
-            logits_real = D(hr_patchs)
+            fake_chars = segment_chars(fake_hr_patchs)
+            logits_fake = D(fake_chars)
+            logits_real = D(hr_chars)
             # feature_fake = VGG((fake_patchs+1)/2.)
             # feature_real = VGG((hr_patchs+1)/2.)
             d_loss1 = tl.cost.sigmoid_cross_entropy(logits_real, tf.ones_like(logits_real))
