@@ -133,7 +133,7 @@ def train():
         hr_chars = segment_chars(hr_patchs)
         with tf.GradientTape(persistent=True) as tape:
             fake_patchs = G(lr_patchs)
-            fake_chars = segment_chars(fake_hr_patchs)
+            fake_chars = segment_chars(fake_patchs)
             logits_fake = D(fake_chars)
             logits_real = D(hr_chars)
             # feature_fake = VGG((fake_patchs+1)/2.)
