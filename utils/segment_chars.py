@@ -1,4 +1,5 @@
 import numpy as np
+import tensorflow as tf
 
 CHARS = 4  # Number of chars in the plate
 H_START = 8
@@ -10,7 +11,10 @@ CHAR_WIDTH = 23
 def squarify(img, normalize=True):
     """Squarify an 23x44 img to 44x44"""
 
-    filling = np.ones((44, 21, 3), dtype=img.dtype) * 255
+    dtype = img.dtype
+    if isinstance(dtype, tf.DType):
+        dtype = img.dtype.as_numpy_dtype
+    filling = np.ones((44, 21, 3), dtype=dtype) * 255
     if normalize:
         filling /= (255/2)
         filling -= 1
