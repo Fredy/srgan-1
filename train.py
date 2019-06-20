@@ -198,12 +198,31 @@ def evaluate():
     out_bicu = scipy.misc.imresize(valid_lr_img, [size[0] * 4, size[1] * 4], interp='bicubic', mode=None)
     tl.vis.save_image(out_bicu, save_dir + '/valid_bicubic.png')
 
+def single(img_name):
+
+    checkpoint_dir = "checkpoint"  # checkpoint_resize_conv
+    path = os.path.dirname(img_name)
+    img_name = os.path.basename(img_name)
+    lr_img = tl.vis.read_image(img_name, path).astype(np.float32)
+
+    lr_img = (lr_img / 127.5) - 1  # rescale to ［－1, 1]
+
+    G = get_G([1, None, None, 3])
+    G.load_weights(checkpoint_dir + '/g_srgan.h5')
+    G.eval()
+
+    out = G(lr_img[np.newaxis, :]).numpy()
+
+    tl.vis.save_image(out[0], 'out_img.png')
+
 
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--mode', type=str, default='srgan', help='srgan, evaluate')
+
+    parser.add_argument('--img', type=str, help='img path')
 
     args = parser.parse_args()
 
@@ -213,5 +232,7 @@ if __name__ == '__main__':
         train()
     elif tl.global_flag['mode'] == 'evaluate':
         evaluate()
+    elif args.mode == 'one':
+        single(args.img)
     else:
         raise Exception("Unknow --mode")
