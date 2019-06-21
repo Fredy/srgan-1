@@ -136,6 +136,7 @@ def train():
             fake_chars = segment_chars(fake_patchs)
             logits_fake = D(fake_chars)
             logits_real = D(hr_chars)
+            del fake_chars
             # feature_fake = VGG((fake_patchs+1)/2.)
             # feature_real = VGG((hr_patchs+1)/2.)
             d_loss1 = tl.cost.sigmoid_cross_entropy(logits_real, tf.ones_like(logits_real))
