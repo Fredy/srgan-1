@@ -148,9 +148,9 @@ def train():
             g_loss = mse_loss + g_gan_loss
         grad = tape.gradient(g_loss, G.trainable_weights)
         grad = tape.gradient(d_loss, D.trainable_weights)
-        del tape
         g_optimizer.apply_gradients(zip(grad, G.trainable_weights))
         d_optimizer.apply_gradients(zip(grad, D.trainable_weights))
+        del tape
         step += 1
         epoch = step//n_step_epoch
         print("Epoch: [{}/{}] step: [{}/{}] time: {}s, g_loss(mse:{}, vgg:{}, adv:{}) d_loss: {}".format(
