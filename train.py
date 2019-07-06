@@ -130,14 +130,15 @@ def train():
     n_step_epoch = round(n_epoch // batch_size)
     for step, (lr_patchs, hr_patchs) in enumerate(train_ds):
         step_time = time.time()
-        hr_chars = segment_chars(hr_patchs)
         with tf.GradientTape(persistent=True) as tape:
             fake_patchs = G(lr_patchs)
             with tape.stop_recording():
+                hr_chars = segment_chars(hr_patchs)
                 fake_chars = segment_chars(fake_patchs)
             logits_fake = D(fake_chars)
             logits_real = D(hr_chars)
             del fake_chars
+            del hr_chars
             # feature_fake = VGG((fake_patchs+1)/2.)
             # feature_real = VGG((hr_patchs+1)/2.)
             d_loss1 = tl.cost.sigmoid_cross_entropy(logits_real, tf.ones_like(logits_real))
@@ -145,6 +146,7 @@ def train():
             d_loss = d_loss1 + d_loss2
             g_gan_loss = 1e-3 * tl.cost.sigmoid_cross_entropy(logits_fake, tf.ones_like(logits_fake))
             mse_loss = tl.cost.mean_squared_error(fake_patchs, hr_patchs, is_mean=True)
+            del fake_patchs
             # vgg_loss = 2e-6 * tl.cost.mean_squared_error(feature_fake, feature_real, is_mean=True)
             g_loss = mse_loss + g_gan_loss
         grad = tape.gradient(g_loss, G.trainable_weights)

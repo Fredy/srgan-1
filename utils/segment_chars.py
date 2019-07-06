@@ -44,3 +44,10 @@ def segment_chars(batch, normalize=True):
             chars.append(block)
 
     return np.array(chars)
+
+if __name__ == "__main__":
+    while True:
+        batch = np.ones((4,60,180,3))
+        i = segment_chars(batch)
+
+
