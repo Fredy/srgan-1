@@ -170,6 +170,8 @@ def train():
             tl.vis.save_images(fake_patchs.numpy(), [ni, ni], save_dir_gan + '/train_g_1_{}.png'.format(epoch))
             G.save_weights(checkpoint_dir + '/g_{}.h5'.format(tl.global_flag['mode']))
             D.save_weights(checkpoint_dir + '/d_{}.h5'.format(tl.global_flag['mode']))
+            D.release_memory()
+            G.release_memory()
             # Trying to free some memory
             gc.collect()
 
