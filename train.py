@@ -146,7 +146,6 @@ def train():
             d_loss = d_loss1 + d_loss2
             g_gan_loss = 1e-3 * tl.cost.sigmoid_cross_entropy(logits_fake, tf.ones_like(logits_fake))
             mse_loss = tl.cost.mean_squared_error(fake_patchs, hr_patchs, is_mean=True)
-            del fake_patchs
             # vgg_loss = 2e-6 * tl.cost.mean_squared_error(feature_fake, feature_real, is_mean=True)
             g_loss = mse_loss + g_gan_loss
         grad = tape.gradient(g_loss, G.trainable_weights)
