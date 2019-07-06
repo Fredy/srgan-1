@@ -1,7 +1,7 @@
 #! /usr/bin/python
 # -*- coding: utf8 -*-
 
-import os, time, pickle, random, time
+import os, time, pickle, random, gc
 from datetime import datetime
 import numpy as np
 from time import localtime, strftime
@@ -133,7 +133,8 @@ def train():
         hr_chars = segment_chars(hr_patchs)
         with tf.GradientTape(persistent=True) as tape:
             fake_patchs = G(lr_patchs)
-            fake_chars = segment_chars(fake_patchs)
+            with tape.stop_recording():
+                fake_chars = segment_chars(fake_patchs)
             logits_fake = D(fake_chars)
             logits_real = D(hr_chars)
             del fake_chars
@@ -167,6 +168,8 @@ def train():
             tl.vis.save_images(fake_patchs.numpy(), [ni, ni], save_dir_gan + '/train_g_1_{}.png'.format(epoch))
             G.save_weights(checkpoint_dir + '/g_{}.h5'.format(tl.global_flag['mode']))
             D.save_weights(checkpoint_dir + '/d_{}.h5'.format(tl.global_flag['mode']))
+            # Trying to free some memory
+            gc.collect()
 
 
 
