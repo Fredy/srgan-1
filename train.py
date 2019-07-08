@@ -9,9 +9,10 @@ import logging, scipy, multiprocessing
 import tensorflow as tf
 import tensorlayer as tl
 from model import get_G
-from model_og import get_D
+from model import get_D
 from config import config
 from utils.segment_chars import segment_chars
+from utils.char_recog import chars_to_one_hot
 
 ###====================== HYPER-PARAMETERS ===========================###
 ## Adam
@@ -46,6 +47,9 @@ def train():
     ## If your machine have enough memory, please pre-load the whole train set.
     train_hr_imgs = tl.vis.read_images(train_hr_img_list, path=config.TRAIN.hr_img_path, n_threads=32)
     train_lr_imgs = tl.vis.read_images(train_lr_img_list, path=config.TRAIN.lr_img_path, n_threads=32)
+    with open(config.TRAIN.labels) as f:
+        label_imgs = list(f)
+        label_imgs = [i.split(' ')[1].strip() for i in label_imgs]
     # for im in train_hr_imgs:
     #     print(im.shape)
     # valid_lr_imgs = tl.vis.read_images(valid_lr_img_list, path=config.VALID.lr_img_path, n_threads=32)
@@ -57,9 +61,9 @@ def train():
 
     # dataset API and augmentation
     def generator_train():
-        for lr, hr in zip(train_lr_imgs, train_hr_imgs):
-            yield lr, hr
-    def _map_fn_train(lr, hr):
+        for lr, hr, label in zip(train_lr_imgs, train_hr_imgs, label_imgs):
+            yield lr, hr, label
+    def _map_fn_train(lr, hr, label):
         # hr_patch = tf.image.random_crop(img, [60, 60, 3])
         lr = lr / (255. / 2.)
         lr = lr - 1.
@@ -68,8 +72,8 @@ def train():
         hr = hr - 1.
         # hr_patch = tf.image.random_flip_left_right(hr_patch)
         # lr_patch = tf.image.resize(hr_patch, size=[30, 30])
-        return lr, hr
-    train_ds = tf.data.Dataset.from_generator(generator_train, output_types=(tf.float32, tf.float32))
+        return lr, hr, label
+    train_ds = tf.data.Dataset.from_generator(generator_train, output_types=(tf.float32, tf.float32, tf.string))
     train_ds = train_ds.map(_map_fn_train, num_parallel_calls=multiprocessing.cpu_count())
     train_ds = train_ds.repeat(n_epoch_init + n_epoch)
     train_ds = train_ds.shuffle(shuffle_buffer_size)
@@ -101,7 +105,7 @@ def train():
         print('G initial weights loaded!')
     except FileNotFoundError:
         n_step_epoch = round(n_epoch_init // batch_size)
-        for step, (lr_patchs, hr_patchs) in enumerate(train_ds):
+        for step, (lr_patchs, hr_patchs, _) in enumerate(train_ds):
             step_time = time.time()
             step += 1
             epoch = step//n_step_epoch
@@ -128,26 +132,30 @@ def train():
 
     # adversarial learning (G, D)
     n_step_epoch = round(n_epoch // batch_size)
-    for step, (lr_patchs, hr_patchs) in enumerate(train_ds):
+    for step, (lr_patchs, hr_patchs, label_str) in enumerate(train_ds):
         step_time = time.time()
         with tf.GradientTape(persistent=True) as tape:
             fake_patchs = G(lr_patchs)
             with tape.stop_recording():
                 hr_chars = segment_chars(hr_patchs)
                 fake_chars = segment_chars(fake_patchs)
+                real_one_hot = [chars_to_one_hot(i, True) for i in label_imgs]
+                real_one_hot = np.concatenate(real_one_hot)
+                fake_one_hot = [chars_to_one_hot(i, false) for i in label_imgs]
+                fake_one_hot = np.concatenate(fake_one_hot)
             logits_fake = D(fake_chars)
             logits_real = D(hr_chars)
             del fake_chars
             del hr_chars
             # feature_fake = VGG((fake_patchs+1)/2.)
             # feature_real = VGG((hr_patchs+1)/2.)
-            d_loss1 = tl.cost.sigmoid_cross_entropy(logits_real, tf.ones_like(logits_real))
-            d_loss2 = tl.cost.sigmoid_cross_entropy(logits_fake, tf.zeros_like(logits_fake))
+            d_loss1 = tl.cost.sigmoid_cross_entropy(logits_real, real_one_hot)
+            d_loss2 = tl.cost.sigmoid_cross_entropy(logits_fake, fake_one_hot)
             d_loss = d_loss1 + d_loss2
-            g_gan_loss = 1e-3 * tl.cost.sigmoid_cross_entropy(logits_fake, tf.ones_like(logits_fake))
+            # g_gan_loss = 1e-3 * tl.cost.sigmoid_cross_entropy(logits_fake, tf.ones_like(logits_fake))
             mse_loss = tl.cost.mean_squared_error(fake_patchs, hr_patchs, is_mean=True)
             # vgg_loss = 2e-6 * tl.cost.mean_squared_error(feature_fake, feature_real, is_mean=True)
-            g_loss = mse_loss + g_gan_loss
+            g_loss = mse_loss + d_loss2
         grad = tape.gradient(g_loss, G.trainable_weights)
         g_optimizer.apply_gradients(zip(grad, G.trainable_weights))
         grad = tape.gradient(d_loss, D.trainable_weights)

@@ -93,7 +93,7 @@ def get_D(input_shape):
 
     net = Flatten()(net)
     net = Dense(n_units=1024, act=tl.act.lrelu)(net)
-    net = Dense(n_units=1, act=tl.act.lrelu)(net)
+    net = Dense(n_units=35, act=tl.act.lrelu)(net)
     # TODO: Use 2 separate dense layers?
     # one for fake or real prob
     # other for one hot vector

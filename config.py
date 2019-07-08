@@ -22,6 +22,7 @@ config.TRAIN.decay_every = int(config.TRAIN.n_epoch / 2)
 ## train set location
 config.TRAIN.hr_img_path = '/content/license_plates/train_Dataset/label/'
 config.TRAIN.lr_img_path = '/content/license_plates/train_Dataset/train/'
+config.TRAIN.labels = '/content/license_plates/train.txt'
 
 config.VALID = edict()
 ## test set location
