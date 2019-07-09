@@ -26,7 +26,7 @@ config.TRAIN.lr_img_path = '/home/fredy/Desktop/license_plates/train_Dataset/tra
 config.VALID = edict()
 ## test set location
 config.VALID.hr_img_path = 'data2017/DIV2K_valid_HR/'
-config.VALID.lr_img_path = 'data2017/DIV2K_valid_LR_bicubic/X4/'
+config.VALID.lr_img_path = '/home/fredy/Desktop/license_plates_or/test_Dataset/test/source/'
 
 def log_config(filename, cfg):
     with open(filename, 'w') as f:
